@@ -28,19 +28,17 @@ public class Main extends Application {
     }
 
     private Paint generateColor() {
-        String rgb = "#";
-
+        StringBuilder rgb = new StringBuilder("#");
         for (int i = 0; i < RGB_PATTERN; i++) {
             String temp = Integer.toHexString(rnd.nextInt(COLOR_SPAN));
-            rgb += (temp.length() == 2) ? temp : '0' + temp;
+            rgb.append((temp.length() == 2) ? temp : '0' + temp);
         }
-        return Paint.valueOf(rgb);
+        return Paint.valueOf(rgb.toString());
     }
 
     private Circle generateCircle(int minRadius, int maxRadius) {
-        Circle c = new Circle(rnd.nextInt(WINDOW_WIDTH),
-                rnd.nextInt(WINDOW_HEIGHT),
-                rnd.nextInt(maxRadius));
+        int iRadius = rnd.nextInt(maxRadius - minRadius) + minRadius;
+        Circle c = new Circle(0, WINDOW_WIDTH / 2, iRadius);
 
         c.setStroke(generateColor());
         c.setFill(Paint.valueOf("#00000000"));
@@ -48,10 +46,9 @@ public class Main extends Application {
         return c;
     }
 
-    private void draw(Pane root, int circlesNumber, int circleMinRradius, int circleMaxRradius) {
-        int iX, iY, iR, iC;
-        for (int i = 0; i < circlesNumber; i++) {
-            Circle circle = generateCircle(circleMinRradius, circleMaxRradius);
+    private void draw(Pane root, Circle circles[], int circleMinRradius, int circleMaxRradius) {
+        for (Circle circle: circles) {
+            circle = generateCircle(circleMinRradius, circleMaxRradius);
             root.getChildren().addAll(circle);
         }
     }
@@ -61,17 +58,19 @@ public class Main extends Application {
         Pane root = new Pane();
         Scene scene = new Scene(root);
 
-        int circleNumber, circleMinRradius, circleMaxRradius;
+        int countOfCircles, circleMinRradius, circleMaxRradius;
         Scanner scanner = new Scanner(System.in);
         System.out.print("Введите количество кругов: ");
-        circleNumber = scanner.nextInt();
+        countOfCircles = scanner.nextInt();
         System.out.print("Минимальный радиус круга: ");
         circleMinRradius = scanner.nextInt();
         System.out.print("Максимальный радиус круга: ");
         circleMaxRradius = scanner.nextInt();
 
+        Circle[] circles = new Circle[countOfCircles];
+
         windowSetup(primaryStage);
-        draw(root, circleNumber, circleMinRradius, circleMaxRradius);
+        draw(root, circles, circleMinRradius, circleMaxRradius);
         primaryStage.setScene(scene);
         primaryStage.show();
     }

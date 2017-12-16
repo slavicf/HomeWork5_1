@@ -12,8 +12,6 @@ public class Main extends Application {
     //  --------------------------- declarations ---------------------------------------
     private static final double WINDOW_WIDTH = 400;     // Ширина окна
     private static final double WINDOW_HEIGHT = 400;    // Высота окна
-    private static final double WINDOW_HALF_WIDTH = WINDOW_WIDTH / 2;   // Середина окна по ширине
-    private static final double WINDOW_HALF_HEIGHT = WINDOW_HEIGHT / 2;   // Середина окна по высоте
     private static final int CORNERS = 5 * 2;
     private static final double DEGREE = 360 / CORNERS;
     private static final double ASPECT = 0.382;
@@ -47,10 +45,6 @@ public class Main extends Application {
             corners[i] = new Point(x2, y2);
             degree += DEGREE;
         }
-
-//        for (int i = 0; i < POINTS; i++) {
-//            j = cyclePoint(i, 2, POINTS);
-//        }
 
         for (i = 0; i < CORNERS; i++) {
             j = (i < CORNERS - 1) ? i + 1 : 0;

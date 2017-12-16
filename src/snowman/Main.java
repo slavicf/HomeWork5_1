@@ -32,7 +32,7 @@ public class Main extends Application {
         launch(args);
     }
 
-    private void windowSetup(Stage primaryStage) {
+    void windowSetup(Stage primaryStage) {
         primaryStage.setTitle("Snowman");
         primaryStage.setResizable(false);
         primaryStage.setWidth(WINDOW_WIDTH);

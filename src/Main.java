@@ -1,6 +1,7 @@
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.scene.layout.Pane;
+import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
 import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
@@ -9,10 +10,19 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main extends Application {
-    private static final int WINDOW_WIDTH = 480;
-    private static final int WINDOW_HEIGHT = 640;
-    private static final int RGB_PATTERN = 3;
-    private static final int COLOR_SPAN = 255;
+//  --------------------------- declarations ---------------------------------------
+    private static final double WINDOW_WIDTH = 400;     // Ширина окна
+    private static final double WINDOW_HEIGHT = 800;    // Высота окна
+    private static final double WINDOW_HALF_WIDTH = WINDOW_WIDTH / 2;   // Середина окна по ширине
+    private static final double BOTTOM_OFFSET = 30; // Стартовое смещение от нижнего края окна
+    private static final double RGB_PATTERN = 3;    // Шаблон RGB состоит из 3-х цветов
+    private static final int COLOR_SPAN = 200;      // Диапазон 0-255 умылшенно срезан для получения более тёмных цветов
+
+    private static double mark = WINDOW_HEIGHT - BOTTOM_OFFSET;   // Нижняя метка отрисовки круга
+    private static double radius;       // Радиус текущего круга
+    private static int count;           // Количество кругов
+    private static int minRadius;       // Минимальный радиус круга
+    private static int maxRadius;       // Максимальный радиус круга
 
     private Random rnd = new Random();
 
@@ -28,29 +38,58 @@ public class Main extends Application {
     }
 
     private Paint generateColor() {
-        StringBuilder rgb = new StringBuilder("#");
+        StringBuilder rgb = new StringBuilder("#");     // Инициализируем строку RGB
         for (int i = 0; i < RGB_PATTERN; i++) {
-            String temp = Integer.toHexString(rnd.nextInt(COLOR_SPAN));
-            rgb.append((temp.length() == 2) ? temp : '0' + temp);
+            String temp = Integer.toHexString(rnd.nextInt(COLOR_SPAN)); // Получаем случайный цвет с конвертацией в строку
+            if (temp.length() == 1) rgb.append(0);      // Если число однозначное, то восполняем лидирующий ноль
+            rgb.append(temp);       // Формируем строку шаблона
         }
         return Paint.valueOf(rgb.toString());
     }
 
-    private Circle generateCircle(int minRadius, int maxRadius) {
-        int iRadius = rnd.nextInt(maxRadius - minRadius) + minRadius;
-        Circle c = new Circle(0, WINDOW_WIDTH / 2, iRadius);
+    private Circle generateCircle(boolean bottomShift) {
+        radius = rnd.nextInt(maxRadius - minRadius) + minRadius;
+        if (bottomShift) mark -= radius;      // Смещаем метку вверх перед получением круга на его радиус
+        Circle circle = new Circle(WINDOW_HALF_WIDTH, mark, radius);
+        if (bottomShift) mark -= radius;      // Смещаем метку вверх после получения круга на его радиус
 
-        c.setStroke(generateColor());
-        c.setFill(Paint.valueOf("#00000000"));
-
-        return c;
+        circle.setStroke(generateColor());
+        circle.setStrokeWidth(2);
+        circle.setFill(Color.TRANSPARENT);
+        return circle;
     }
 
-    private void draw(Pane root, Circle circles[], int circleMinRradius, int circleMaxRradius) {
-        for (Circle circle: circles) {
-            circle = generateCircle(circleMinRradius, circleMaxRradius);
+    private void draw(Pane root) {
+        Circle circle;
+        for (int i = 0; i < count; i++) {
+            circle = generateCircle(true);
             root.getChildren().addAll(circle);
         }
+
+        mark += radius;             // Выставляем метку по центру круга
+        final double DEGREE = 30;    // Угол глаз от горизонтальной линии проходящей через центр круга
+        double eyeDistance = 0.55 * radius;    // Дистанция глаз от центра круга
+        double mouthDistance = 0.3 * radius;   // Дистанция рта от центра круга
+
+        double eyeX = eyeDistance * Math.cos(Math.toRadians(DEGREE));       // Смещение глаза по X
+        double eyeY = mark - eyeDistance * Math.sin(Math.toRadians(DEGREE));    // Смещение глаза по Y
+        minRadius = (int) radius / 10;      // Пропорции глаз относительно радиуса головы
+        maxRadius = (int) radius / 3;       // Пропорции глаз относительно радиуса головы
+
+        circle = generateCircle(false);       //
+        circle.setCenterX(WINDOW_HALF_WIDTH - eyeX);    //
+        circle.setCenterY(eyeY);                        //
+        root.getChildren().addAll(circle);              // Строим левый глаз
+
+        circle = generateCircle(false);       //
+        circle.setCenterX(WINDOW_HALF_WIDTH + eyeX);    //
+        circle.setCenterY(eyeY);                        //
+        root.getChildren().addAll(circle);              // Строим правый глаз
+
+        circle = generateCircle(false);       //
+        circle.setCenterY(mark + mouthDistance);        //
+        root.getChildren().addAll(circle);              // Строим рот
+
     }
 
     @Override
@@ -58,19 +97,18 @@ public class Main extends Application {
         Pane root = new Pane();
         Scene scene = new Scene(root);
 
-        int countOfCircles, circleMinRradius, circleMaxRradius;
         Scanner scanner = new Scanner(System.in);
         System.out.print("Введите количество кругов: ");
-        countOfCircles = scanner.nextInt();
+        count = scanner.nextInt();
         System.out.print("Минимальный радиус круга: ");
-        circleMinRradius = scanner.nextInt();
+        minRadius = scanner.nextInt();
         System.out.print("Максимальный радиус круга: ");
-        circleMaxRradius = scanner.nextInt();
+        maxRadius = scanner.nextInt();
 
-        Circle[] circles = new Circle[countOfCircles];
+        windowSetup(primaryStage);                      // Инициализация окна
 
-        windowSetup(primaryStage);
-        draw(root, circles, circleMinRradius, circleMaxRradius);
+        draw(root);                                     // Построение снеговика
+
         primaryStage.setScene(scene);
         primaryStage.show();
     }

@@ -10,18 +10,16 @@ import java.util.Scanner;
 
 public class Main extends Application {
     //  --------------------------- declarations ---------------------------------------
-    private static final double WINDOW_WIDTH = 400;     // Ширина окна
-    private static final double WINDOW_HEIGHT = 400;    // Высота окна
-    private static final int CORNERS = 5 * 2;
-    private static final double DEGREE = 360 / CORNERS;
-    private static final double ASPECT = 0.382;
-    private static Point[] corners = new Point[CORNERS];
-    private static Point center = new Point();
+    private static final double WINDOW_WIDTH = 400;             // Ширина окна
+    private static final double WINDOW_HEIGHT = 400;            // Высота окна
+    private static final int VERTEX_NUM = 5 * 2;                // Количество вершин звезды (внешних и внутренних)
+    private static final double ANGLE = 360 / VERTEX_NUM;       // Угол поворота
+    private static final double RATIO = 2.6180339887498955;     // Соотношение радиусов внешних углов к внутренним
 
-    private static double degree = -90;
-    private static double radius = 200;
-    private static double x1, y1, x2, y2;
-    private static int i, j, k, l;
+    private static Point center = new Point();                  // Центр звезды
+    private static double radius = 200;                         // Радиус звезды
+    private static double degree = -90;                         // Начальный угол
+    private static Point[] vertex = new Point[VERTEX_NUM];      // Массив вершин
 
     public static void main(String[] args) {
         launch(args);
@@ -35,25 +33,25 @@ public class Main extends Application {
     }
 
     private void draw(Pane root) {
-        for (i = 0; i < CORNERS; i++) {
-            x1 = radius * Math.cos(Math.toRadians(degree));
-            y1 = radius * Math.sin(Math.toRadians(degree));
-            corners[i++] = new Point(x1, y1);
-            degree += DEGREE;
-            x2 = radius * ASPECT * Math.cos(Math.toRadians(degree));
-            y2 = radius * ASPECT * Math.sin(Math.toRadians(degree));
-            corners[i] = new Point(x2, y2);
-            degree += DEGREE;
+        int i, j;
+        double startX, startY, endX, endY;
+
+        for (i = 0; i < VERTEX_NUM; i++) {
+            vertex[i] = new Point(radius * Math.cos(Math.toRadians(degree)),
+                    radius * Math.sin(Math.toRadians(degree)));
+            degree += ANGLE;
+            vertex[++i] = new Point(radius / RATIO * Math.cos(Math.toRadians(degree)),
+                    radius / RATIO * Math.sin(Math.toRadians(degree)));
+            degree += ANGLE;
         }
 
-        for (i = 0; i < CORNERS; i++) {
-            j = (i < CORNERS - 1) ? i + 1 : 0;
-            x1 = corners[i].x + center.x;
-            y1 = corners[i].y + center.y;
-            x2 = corners[j].x + center.x;
-            y2 = corners[j].y + center.y;
-
-            Line line = new Line(x1, y1, x2, y2);
+        for (i = 0; i < VERTEX_NUM; i++) {
+            j = (i < VERTEX_NUM - 1) ? i + 1 : 0;
+            startX = vertex[i].x + center.x;
+            startY = vertex[i].y + center.y;
+            endX = vertex[j].x + center.x;
+            endY = vertex[j].y + center.y;
+            Line line = new Line(startX, startY,endX, endY);
             root.getChildren().addAll(line);              // Строим
         }
 
@@ -65,12 +63,9 @@ public class Main extends Application {
             Scene scene = new Scene(root);
 
             Scanner scanner = new Scanner(System.in);
-            System.out.print("Введите координату X центра звезды: ");
-            center.x = scanner.nextInt();
-            System.out.print("Введите координату Y центра звезды: ");
-            center.y = scanner.nextInt();
-            System.out.print("Введите радиус звезды: ");
-            radius = scanner.nextInt();
+            System.out.print("Введите координату X центра звезды: ");     center.x = scanner.nextInt();
+            System.out.print("Введите координату Y центра звезды: ");     center.y = scanner.nextInt();
+            System.out.print("Введите радиус звезды: ");                  radius = scanner.nextInt();
 
             windowSetup(primaryStage);                      // Инициализация окна
 

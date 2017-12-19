@@ -14,7 +14,8 @@ public class Main extends Application {
     private static final double WINDOW_HEIGHT = 400;        // Высота окна
     private static final int VERTEX_NUM = 5 * 2;            // Количество вершин звезды (внешних и внутренних)
     private static final double ANGLE = 360 / VERTEX_NUM;   // Угол поворота
-    private static final double RATIO = 2.618033988749895;  // Оотношение радиусов внешних вершин звезды к внутренним (квадрат золотого сечения)
+    private static final double EXT_VERTEX = 1;             // Делитель радиуса внешних вершин
+    private static final double INT_VERTEX = 2.618033988749895; // Делитель радиуса внутренних вершин (квадрат золотого сечения)
 
     private static Point center = new Point();              // Центр звезды
     private static double radius = WINDOW_WIDTH / 2;        // Радиус звезды
@@ -33,24 +34,19 @@ public class Main extends Application {
         primaryStage.setHeight(WINDOW_HEIGHT);
     }   // Настройка окна
 
-    private void setVertex(int i) {
+    private void setVertex() {
         double x, y;
-        double ratio = (i % 2 == 0) ? 1 : RATIO;    // Для внешних вершин отношение = 1, для внутренних = RATIO
-        x = radius / ratio * Math.cos(Math.toRadians(degree));
-        y = radius / ratio * Math.sin(Math.toRadians(degree));
-        vertex[i] = new Point(x, y);
-        degree += ANGLE;
-    }   // Установка вершины звезды
-
-    private void fillVertex() {
         for (int i = 0; i < VERTEX_NUM; i++) {
-            setVertex(i++);  // Установка внешней вершины звезды
-            setVertex(i);   // Установка внутренней вершины звезды
+            double ratio = (i % 2 == 0) ? EXT_VERTEX : INT_VERTEX; // Для внешних вершин отношение = 1, для внутренних = RATIO
+            x = radius / ratio * Math.cos(Math.toRadians(degree));
+            y = radius / ratio * Math.sin(Math.toRadians(degree));
+            vertex[i] = new Point(x, y);
+            degree += ANGLE;
         }
     }   // Заполнение массива вершин звезды
 
     private void drawStar(Pane root) {
-        fillVertex();    // Заполнение массива вершин звезды
+        setVertex();    // Заполнение массива вершин звезды
 
         for (int i = 0; i < VERTEX_NUM; i++) {
             int j = (i < VERTEX_NUM - 1) ? i + 1 : 0;   // Указатель на конечную точку

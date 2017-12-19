@@ -35,19 +35,17 @@ public class Main extends Application {
     }   // Настройка окна
 
     private void setVertex() {
-        double x, y;
         for (int i = 0; i < VERTEX_NUM; i++) {
-            double ratio = (i % 2 == 0) ? EXT_VERTEX : INT_VERTEX; // Для внешних вершин отношение = 1, для внутренних = RATIO
-            x = radius / ratio * Math.cos(Math.toRadians(degree));
-            y = radius / ratio * Math.sin(Math.toRadians(degree));
+            double ratio = (i % 2 == 0) ? EXT_VERTEX : INT_VERTEX; // Разные делители для внешних и внутренних вершин
+            double x = radius / ratio * Math.cos(Math.toRadians(degree));
+            double y = radius / ratio * Math.sin(Math.toRadians(degree));
             vertex[i] = new Point(x, y);
             degree += ANGLE;
         }
     }   // Заполнение массива вершин звезды
 
     private void drawStar(Pane root) {
-        setVertex();    // Заполнение массива вершин звезды
-
+        setVertex();                                    // Заполнение массива вершин звезды
         for (int i = 0; i < VERTEX_NUM; i++) {
             int j = (i < VERTEX_NUM - 1) ? i + 1 : 0;   // Указатель на конечную точку
             Line line = new Line();

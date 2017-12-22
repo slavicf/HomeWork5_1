@@ -121,15 +121,11 @@ public class Main extends Application {
         Button btn3 = button("Gradient", BUTTON_X, 135);
         btn3.setOnAction(event -> {
             int gradientStep = 220 / (count - 1);
-            String channel;
-            String color = "#";
+            int color;
 
             for (int i = 0; i < count; i++) {
-                channel = Integer.toHexString(gradientStep * i);
-                if (channel.length() == 1) channel = "0" + channel;      // Если число однозначное, то восполняем лидирующий ноль
-                color =  "#" + channel + channel + channel;
-//                circles[i].setFill(Paint.valueOf(color));
-                circles[i].setFill(Color.web(color));
+                color = gradientStep * i;
+                circles[i].setFill(Color.rgb(color, color, color));
             }
         });
 
@@ -137,13 +133,10 @@ public class Main extends Application {
     }
 
     private Paint generateColor() {
-        StringBuilder rgb = new StringBuilder("#");     // Инициализируем строку RGB
-        for (int i = 0; i < RGB_PATTERN; i++) {
-            String temp = Integer.toHexString(rnd.nextInt(COLOR_SPAN)); // Получаем случайный цвет с конвертацией в строку
-            if (temp.length() == 1) rgb.append(0);      // Если число однозначное, то восполняем лидирующий ноль
-            rgb.append(temp);       // Формируем строку шаблона
-        }
-        return Paint.valueOf(rgb.toString());
+        int red = rnd.nextInt(COLOR_SPAN);
+        int green = rnd.nextInt(COLOR_SPAN);
+        int blue = rnd.nextInt(COLOR_SPAN);
+        return Color.rgb(red, green, blue);
     }
 
     private Circle generateCircle(boolean bottomShift) {

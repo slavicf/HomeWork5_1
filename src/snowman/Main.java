@@ -1,7 +1,12 @@
 package snowman;
 
 import javafx.application.Application;
+import javafx.geometry.Pos;
 import javafx.scene.Scene;
+import javafx.scene.control.Button;
+import javafx.scene.control.Label;
+import javafx.scene.control.TextField;
+import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
 import javafx.scene.paint.Paint;
@@ -12,21 +17,30 @@ import java.util.Random;
 import java.util.Scanner;
 
 public class Main extends Application {
-//  --------------------------- declarations ---------------------------------------
+
     private static final double WINDOW_WIDTH = 400;     // Ширина окна
     private static final double WINDOW_HEIGHT = 800;    // Высота окна
     private static final double WINDOW_HALF_WIDTH = WINDOW_WIDTH / 2;   // Середина окна по ширине
-    private static final double BOTTOM_OFFSET = 30; // Стартовое смещение от нижнего края окна
+    private static final double WINDOW_GAP = 30; // Стартовое смещение от нижнего края окна
     private static final double RGB_PATTERN = 3;    // Шаблон RGB состоит из 3-х цветов
     private static final int COLOR_SPAN = 200;      // Диапазон 0-255 умылшенно срезан для получения более тёмных цветов
+    private static final double HBOX_WIDTH = 180;
+    private static final double HBOX_HEIGHT = 25;
+    private static final double HBOX_X = WINDOW_WIDTH - HBOX_WIDTH - WINDOW_GAP;
+    private static final double HBOX_Y = 10;    // Свойства HBox
+    private static final double BUTTON_WIDTH = HBOX_WIDTH;
+    private static final double BUTTON_HEIGHT = 20;
+    private static final double BUTTON_X = WINDOW_WIDTH - BUTTON_WIDTH - WINDOW_GAP;
+    private static final double BUTTON_Y = 85;
 
-    private static double mark = WINDOW_HEIGHT - BOTTOM_OFFSET;   // Нижняя метка отрисовки круга
+    private static double mark = WINDOW_HEIGHT - WINDOW_GAP;   // Нижняя метка отрисовки круга
     private static double radius;       // Радиус текущего круга
     private static int count;           // Количество кругов
     private static int minRadius;       // Минимальный радиус круга
     private static int maxRadius;       // Максимальный радиус круга
+    private static Circle[] circles;    // Максимальный радиус круга
 
-    private Random rnd = new Random();
+    private Random rnd = new Random(); //  declarations
 
     public static void main(String[] args) {
         launch(args);
@@ -37,6 +51,89 @@ public class Main extends Application {
         primaryStage.setResizable(false);
         primaryStage.setWidth(WINDOW_WIDTH);
         primaryStage.setHeight(WINDOW_HEIGHT);
+    }
+
+    Label label(String text) {
+        Label label = new Label(text);
+        return label;
+    } // Создаём Label
+
+    TextField addTextField(String text) {
+        TextField textField = new TextField(text);
+        textField.setPrefColumnCount(2);
+        textField.setAlignment(Pos.CENTER_RIGHT);
+        return textField;
+    } // Создаём TextField
+
+    HBox hBox(double y) {
+        HBox hBox = new HBox(10);
+        hBox.setAlignment(Pos.CENTER_RIGHT);
+        hBox.setLayoutX(HBOX_X);
+        hBox.setLayoutY(HBOX_Y + HBOX_HEIGHT * y);
+        hBox.setPrefSize(HBOX_WIDTH, HBOX_HEIGHT);
+        return hBox;
+    } // Создаём HBox
+
+    Button button(String text, double x, double y) {
+        Button button = new Button(text);
+        button.setLayoutX(x);
+        button.setLayoutY(y);
+        button.setPrefSize(BUTTON_WIDTH, BUTTON_HEIGHT);
+        return button;
+    } // Создаём Button
+
+    void controls(Pane root, Pane pane) {
+
+        Label lblCount = label("Количество кругов:");
+        TextField tfCount = addTextField("5");
+        HBox hbCount = hBox(0);
+        hbCount.getChildren().addAll(lblCount, tfCount);
+        root.getChildren().add(hbCount);
+
+        Label lblMinRadius = label("Минимальный радиус:");
+        TextField tfMinRadius = addTextField("10");
+        HBox hbMinRadius = hBox(1);
+        hbMinRadius.getChildren().addAll(lblMinRadius, tfMinRadius);
+        root.getChildren().add(hbMinRadius);
+
+        Label lblMaxRadius = label("Максимальный радиус:");
+        TextField tfMaxRadius = addTextField("50");
+        HBox hbMaxRadius = hBox(2);
+        hbMaxRadius.getChildren().addAll(lblMaxRadius, tfMaxRadius);
+        root.getChildren().add(hbMaxRadius);
+
+        Button btn1 = button("Нарисовать снеговика", BUTTON_X, 85);
+        btn1.setOnAction(event -> {
+            count = Integer.parseInt(tfCount.getText());
+            minRadius = Integer.parseInt(tfMinRadius.getText());
+            maxRadius = Integer.parseInt(tfMaxRadius.getText());
+            mark = WINDOW_HEIGHT - WINDOW_GAP;  // Нижняя метка отрисовки круга
+            draw(pane);                         // Построение снеговика
+        });
+
+        Button btn2 = button("Покрасить все круги в красный", BUTTON_X, 110);
+        btn2.setOnAction(event -> {
+            for (int i = 0; i < count; i++) {
+                circles[i].setFill(Color.RED);
+            }
+        });
+
+        Button btn3 = button("Gradient", BUTTON_X, 135);
+        btn3.setOnAction(event -> {
+            int gradientStep = 220 / (count - 1);
+            String channel;
+            String color = "#";
+
+            for (int i = 0; i < count; i++) {
+                channel = Integer.toHexString(gradientStep * i);
+                if (channel.length() == 1) channel = "0" + channel;      // Если число однозначное, то восполняем лидирующий ноль
+                color =  "#" + channel + channel + channel;
+//                circles[i].setFill(Paint.valueOf(color));
+                circles[i].setFill(Color.web(color));
+            }
+        });
+
+        root.getChildren().addAll(btn1, btn2, btn3);
     }
 
     private Paint generateColor() {
@@ -61,13 +158,7 @@ public class Main extends Application {
         return circle;
     }
 
-    private void draw(Pane root) {
-        Circle circle;
-        for (int i = 0; i < count; i++) {
-            circle = generateCircle(true);
-            root.getChildren().addAll(circle);
-        }
-
+    private void face(Pane pane) {
         mark += radius;             // Выставляем метку по центру круга
         final double DEGREE = 30;    // Угол глаз от горизонтальной линии проходящей через центр круга
         double eyeDistance = 0.55 * radius;    // Дистанция глаз от центра круга
@@ -78,40 +169,52 @@ public class Main extends Application {
         minRadius = (int) radius / 10;      // Пропорции глаз относительно радиуса головы
         maxRadius = (int) radius / 3;       // Пропорции глаз относительно радиуса головы
 
-        circle = generateCircle(false);       //
-        circle.setCenterX(WINDOW_HALF_WIDTH - eyeX);    //
-        circle.setCenterY(eyeY);                        //
-        root.getChildren().addAll(circle);              // Строим левый глаз
+        Circle face = generateCircle(false);       //
+        face.setCenterX(WINDOW_HALF_WIDTH - eyeX);    //
+        face.setCenterY(eyeY);                        //
+        pane.getChildren().add(face);              // Строим левый глаз
 
-        circle = generateCircle(false);       //
-        circle.setCenterX(WINDOW_HALF_WIDTH + eyeX);    //
-        circle.setCenterY(eyeY);                        //
-        root.getChildren().addAll(circle);              // Строим правый глаз
+        face = generateCircle(false);       //
+        face.setCenterX(WINDOW_HALF_WIDTH + eyeX);    //
+        face.setCenterY(eyeY);                        //
+        pane.getChildren().add(face);              // Строим правый глаз
 
-        circle = generateCircle(false);       //
-        circle.setCenterY(mark + mouthDistance);        //
-        root.getChildren().addAll(circle);              // Строим рот
+        face = generateCircle(false);       //
+        face.setCenterY(mark + mouthDistance);        //
+        pane.getChildren().add(face);              // Строим рот
+    }
 
+    private void draw(Pane pane) {
+        pane.getChildren().clear();
+        Circle[] circle = new Circle[count];
+        for (int i = 0; i < count; i++) {
+            circle[i] = generateCircle(true);
+            pane.getChildren().add(circle[i]);
+        }
+        circles = circle;
+
+        face(pane);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
         Pane root = new Pane();
-        Scene scene = new Scene(root);
+        Pane pane = new Pane();
+        root.getChildren().addAll(pane);
 
-        Scanner scanner = new Scanner(System.in);
-        System.out.print("Введите количество кругов: ");
-        count = scanner.nextInt();
-        System.out.print("Минимальный радиус круга: ");
-        minRadius = scanner.nextInt();
-        System.out.print("Максимальный радиус круга: ");
-        maxRadius = scanner.nextInt();
+//        Scanner scanner = new Scanner(System.in);
+//        System.out.print("Введите количество кругов: ");
+//        count = scanner.nextInt();
+//        System.out.print("Минимальный радиус круга: ");
+//        minRadius = scanner.nextInt();
+//        System.out.print("Максимальный радиус круга: ");
+//        maxRadius = scanner.nextInt();
 
         windowSetup(primaryStage);                      // Инициализация окна
 
-        draw(root);                                     // Построение снеговика
+        controls(root, pane);
 
-        primaryStage.setScene(scene);
+        primaryStage.setScene(new Scene(root));
         primaryStage.show();
     }
 }

@@ -6,6 +6,7 @@ import javafx.scene.Scene;
 import javafx.scene.control.Button;
 import javafx.scene.control.Label;
 import javafx.scene.control.TextField;
+import javafx.scene.image.Image;
 import javafx.scene.layout.HBox;
 import javafx.scene.layout.Pane;
 import javafx.scene.paint.Color;
@@ -14,26 +15,23 @@ import javafx.scene.shape.Circle;
 import javafx.stage.Stage;
 
 import java.util.Random;
-import java.util.Scanner;
 
 public class Main extends Application {
 
-    private static final double WINDOW_WIDTH = 400;     // Ширина окна
-    private static final double WINDOW_HEIGHT = 800;    // Высота окна
-    private static final double WINDOW_HALF_WIDTH = WINDOW_WIDTH / 2;   // Середина окна по ширине
-    private static final double WINDOW_GAP = 30; // Стартовое смещение от нижнего края окна
-    private static final double RGB_PATTERN = 3;    // Шаблон RGB состоит из 3-х цветов
+    private static final double WIDTH = 400;     // Ширина окна
+    private static final double HEIGHT = 800;    // Высота окна
+    private static final double HALF_WIDTH = WIDTH / 2;   // Середина окна по ширине
     private static final int COLOR_SPAN = 200;      // Диапазон 0-255 умылшенно срезан для получения более тёмных цветов
     private static final double HBOX_WIDTH = 180;
     private static final double HBOX_HEIGHT = 25;
-    private static final double HBOX_X = WINDOW_WIDTH - HBOX_WIDTH - WINDOW_GAP;
+    private static final double HBOX_X = WIDTH - HBOX_WIDTH;
     private static final double HBOX_Y = 10;    // Свойства HBox
     private static final double BUTTON_WIDTH = HBOX_WIDTH;
     private static final double BUTTON_HEIGHT = 20;
-    private static final double BUTTON_X = WINDOW_WIDTH - BUTTON_WIDTH - WINDOW_GAP;
+    private static final double BUTTON_X = WIDTH - BUTTON_WIDTH;
     private static final double BUTTON_Y = 85;
 
-    private static double mark = WINDOW_HEIGHT - WINDOW_GAP;   // Нижняя метка отрисовки круга
+    private static double mark = HEIGHT;// Нижняя метка отрисовки круга
     private static double radius;       // Радиус текущего круга
     private static int count;           // Количество кругов
     private static int minRadius;       // Минимальный радиус круга
@@ -48,9 +46,12 @@ public class Main extends Application {
 
     void windowSetup(Stage primaryStage) {
         primaryStage.setTitle("Snowman");
+//        primaryStage.getIcons().add(new Image("http://www.endlessicons.com/wp-content/uploads/2013/12/snowman-icon-614x460.png"));
+        Image icon = new Image(getClass().getResourceAsStream("images/snowman.png"));
+        primaryStage.getIcons().add(icon);
         primaryStage.setResizable(false);
-        primaryStage.setWidth(WINDOW_WIDTH);
-        primaryStage.setHeight(WINDOW_HEIGHT);
+//        primaryStage.setWidth(WIDTH);
+//        primaryStage.setHeight(HEIGHT);
     }
 
     Label label(String text) {
@@ -107,7 +108,7 @@ public class Main extends Application {
             count = Integer.parseInt(tfCount.getText());
             minRadius = Integer.parseInt(tfMinRadius.getText());
             maxRadius = Integer.parseInt(tfMaxRadius.getText());
-            mark = WINDOW_HEIGHT - WINDOW_GAP;  // Нижняя метка отрисовки круга
+            mark = HEIGHT;                      // Нижняя метка отрисовки круга
             draw(pane);                         // Построение снеговика
         });
 
@@ -142,7 +143,7 @@ public class Main extends Application {
     private Circle generateCircle(boolean bottomShift) {
         radius = rnd.nextInt(maxRadius - minRadius) + minRadius;
         if (bottomShift) mark -= radius;      // Смещаем метку вверх перед получением круга на его радиус
-        Circle circle = new Circle(WINDOW_HALF_WIDTH, mark, radius);
+        Circle circle = new Circle(HALF_WIDTH, mark, radius);
         if (bottomShift) mark -= radius;      // Смещаем метку вверх после получения круга на его радиус
 
         circle.setStroke(generateColor());
@@ -163,12 +164,12 @@ public class Main extends Application {
         maxRadius = (int) radius / 3;       // Пропорции глаз относительно радиуса головы
 
         Circle face = generateCircle(false);       //
-        face.setCenterX(WINDOW_HALF_WIDTH - eyeX);    //
+        face.setCenterX(HALF_WIDTH - eyeX);    //
         face.setCenterY(eyeY);                        //
         pane.getChildren().add(face);              // Строим левый глаз
 
         face = generateCircle(false);       //
-        face.setCenterX(WINDOW_HALF_WIDTH + eyeX);    //
+        face.setCenterX(HALF_WIDTH + eyeX);    //
         face.setCenterY(eyeY);                        //
         pane.getChildren().add(face);              // Строим правый глаз
 
@@ -192,6 +193,7 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
         Pane root = new Pane();
+        Scene scene = new Scene(root, WIDTH, HEIGHT);
         Pane pane = new Pane();
         root.getChildren().addAll(pane);
 
@@ -207,7 +209,7 @@ public class Main extends Application {
 
         controls(root, pane);
 
-        primaryStage.setScene(new Scene(root));
+        primaryStage.setScene(scene);
         primaryStage.show();
     }
 }
